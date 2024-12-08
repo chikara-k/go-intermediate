@@ -1,0 +1,20 @@
+version: '3.9'
+
+services:
+  mysql:
+    image: mysql:8.0.33
+    container_name: db-for-go
+    ports:
+      - '3307:3306'
+    environment:
+      MYSQL_ROOT_USER: ${MYSQLSAMPLEROOTUSER}
+      MYSQL_ROOT_PASSWORD: ${MYSQLSAMPLEROOTPASS}
+      MYSQL_DATABASE: ${MYSQLSAMPLEDATABASE}
+      MYSQL_USER: ${MYSQLSAMPLEUSERNAME}
+      MYSQL_PASSWORD: ${MYSQLSAMPLEPASSWORD}
+      TZ: 'Asia/Tokyo'
+    volumes:
+      - db-volume:/var/lib/mysql
+
+volumes:
+  db-volume:
