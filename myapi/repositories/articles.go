@@ -3,7 +3,7 @@ package repositories
 import (
 	"database/sql"
 
-	"github.com/yourname/reponame/models"
+	"github.com/chikara-k/go-intermediate/models"
 )
 
 const (

@@ -3,7 +3,7 @@ package repositories
 import (
 	"database/sql"
 
-	"github.com/yourname/reponame/models"
+	"github.com/chikara-k/go-intermediate/models"
 )
 
 func InsertComment(db *sql.DB, comment models.Comment) (models.Comment, error) {
