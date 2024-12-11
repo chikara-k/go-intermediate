@@ -6,13 +6,14 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/chikara-k/go-intermediate/apperrors"
 	"github.com/chikara-k/go-intermediate/controllers/services"
 	"github.com/chikara-k/go-intermediate/models"
 	"github.com/gorilla/mux"
 )
 
 type ArticleController struct {
-	service services.ArticleServicer // Article 用のサービスインターフェース
+	service services.ArticleServicer
 }
 
 func NewArticleController(s services.ArticleServicer) *ArticleController {
@@ -20,20 +21,21 @@ func NewArticleController(s services.ArticleServicer) *ArticleController {
 }
 
 // GET /hello のハンドラ
-func (c *MyAppController) HelloHandler(w http.ResponseWriter, req *http.Request) {
+func (c *ArticleController) HelloHandler(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, "Hello, world!\n")
 }
 
 // POST /article のハンドラ
-func (c *MyAppController) PostArticleHandler(w http.ResponseWriter, req *http.Request) {
+func (c *ArticleController) PostArticleHandler(w http.ResponseWriter, req *http.Request) {
 	var reqArticle models.Article
 	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
-		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
+		err = apperrors.ReqBodyDecodeFailed.Wrap(err, "bad request body")
+		apperrors.ErrorHandler(w, req, err)
 	}
 
 	article, err := c.service.PostArticleService(reqArticle)
 	if err != nil {
-		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
+		apperrors.ErrorHandler(w, req, err)
 		return
 	}
 
@@ -41,7 +43,7 @@ func (c *MyAppController) PostArticleHandler(w http.ResponseWriter, req *http.Re
 }
 
 // GET /article/list のハンドラ
-func (c *MyAppController) ArticleListHandler(w http.ResponseWriter, req *http.Request) {
+func (c *ArticleController) ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 	queryMap := req.URL.Query()
 
 	// クエリパラメータpageを取得
@@ -50,7 +52,8 @@ func (c *MyAppController) ArticleListHandler(w http.ResponseWriter, req *http.Re
 		var err error
 		page, err = strconv.Atoi(p[0])
 		if err != nil {
-			http.Error(w, "Invalid query parameter", http.StatusBadRequest)
+			err = apperrors.BadParam.Wrap(err, "queryparam must be number")
+			apperrors.ErrorHandler(w, req, err)
 			return
 		}
 	} else {
@@ -59,7 +62,7 @@ func (c *MyAppController) ArticleListHandler(w http.ResponseWriter, req *http.Re
 
 	articleList, err := c.service.GetArticleListService(page)
 	if err != nil {
-		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
+		apperrors.ErrorHandler(w, req, err)
 		return
 	}
 
@@ -67,16 +70,17 @@ func (c *MyAppController) ArticleListHandler(w http.ResponseWriter, req *http.Re
 }
 
 // GET /article/{id} のハンドラ
-func (c *MyAppController) ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
+func (c *ArticleController) ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
 	articleID, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
-		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
+		err = apperrors.BadParam.Wrap(err, "pathparam must be number")
+		apperrors.ErrorHandler(w, req, err)
 		return
 	}
 
 	article, err := c.service.GetArticleService(articleID)
 	if err != nil {
-		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
+		apperrors.ErrorHandler(w, req, err)
 		return
 	}
 
@@ -84,15 +88,16 @@ func (c *MyAppController) ArticleDetailHandler(w http.ResponseWriter, req *http.
 }
 
 // POST /article/nice のハンドラ
-func (c *MyAppController) PostNiceHandler(w http.ResponseWriter, req *http.Request) {
+func (c *ArticleController) PostNiceHandler(w http.ResponseWriter, req *http.Request) {
 	var reqArticle models.Article
 	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
-		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
+		err = apperrors.ReqBodyDecodeFailed.Wrap(err, "bad request body")
+		apperrors.ErrorHandler(w, req, err)
 	}
 
 	article, err := c.service.PostNiceService(reqArticle)
 	if err != nil {
-		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
+		apperrors.ErrorHandler(w, req, err)
 		return
 	}
 
